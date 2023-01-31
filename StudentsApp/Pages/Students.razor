@@ -1,0 +1,81 @@
+﻿@page "/students"
+
+<PageTitle>Weather forecast</PageTitle>
+
+@using StudentsApp.Data
+@inject IJSRuntime js
+@inject IStudentService StudentService
+@inject NavigationManager navigator
+
+<h1>Studenci</h1>
+
+
+@if (students == null)
+{
+	<p><em>Loading...</em></p>
+}
+else
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Avatar</th>
+				<th @onclick="@(() => OrderStudents("FirstName"))">First name</th>
+				<th @onclick="@(() => OrderStudents("LastName"))">Last name</th>
+				<th @onclick="@(() => OrderStudents("Birthdate"))">Birthdate</th>
+				<th @onclick="@(() => OrderStudents("Studies"))">Studies</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var student in students)
+			{
+				<StudentRow Student="student" OnDeleteClicked="DeleteStudent" OnRowClicked="GoToStudent" />
+			}
+		</tbody>
+	</table>
+}
+
+@code {
+	private List<Student> students;
+	public KeyValuePair<string, bool> sortOrder { get; set; } = new KeyValuePair<string, bool>("", false);
+
+	protected override async Task OnInitializedAsync()
+	{
+		students = await StudentService.GetStudents();
+	}
+
+	private void OrderStudents(string key)
+	{
+		if (sortOrder.Key == key)
+		{
+			sortOrder = new KeyValuePair<string, bool>(key, !sortOrder.Value);
+		}
+		else
+		{
+			sortOrder = new KeyValuePair<string, bool>(key, false);
+		}
+		if (sortOrder.Value)
+		{
+			students = students.OrderBy(x => x.GetType().GetProperty(sortOrder.Key).GetValue(x)).ToList();
+		}
+		else
+		{
+			students = students.OrderByDescending(x => x.GetType().GetProperty(sortOrder.Key).GetValue(x)).ToList();
+		}
+	}
+
+	private async Task DeleteStudent(Student student)
+	{
+		var deleteConfirmed = await js.InvokeAsync<bool>("confirm", "Czy na pewno usunąć studenta?");
+		if (!deleteConfirmed) return;
+		await StudentService.RemoveStudent(student.Id);
+	}
+
+	private void GoToStudent(Student student)
+	{
+		navigator.NavigateTo($"/students/{student.Id}");
+	}
+
+
+}

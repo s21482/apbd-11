@@ -1,0 +1,56 @@
+﻿@page "/students/{id:int}"
+@inject IStudentService StudentService
+@inject NavigationManager navigator
+
+<h3>Student Details</h3>
+<div class="row gx-5">
+	<div class="col d-flex flex-column" style="gap: 10px;">
+		<label class="w-100 d-flex justify-content-end" style="gap: 10px;">
+			First name:
+			<input class="w-75 text-center" value="@Student.FirstName" disabled />
+		</label>
+		<label class="w-100 d-flex justify-content-end" style="gap: 10px;">
+			Last name:
+			<input class="w-75 text-center"  value="@Student.LastName" disabled />
+
+		</label>
+		<label class="w-100 d-flex justify-content-end" style="gap: 10px;">
+			Birthdate:
+			<input class="w-75 text-center" value="@Student.Birthdate.ToShortDateString()" disabled />
+
+		</label>
+		<label class="w-100 d-flex justify-content-end" style="gap: 10px;">
+			Studies:
+			<input class="w-75 text-center" value="@Student.Studies" disabled />
+		</label>
+	</div>
+	<div class="col d-flex flex-column">
+		<label class="w-100 d-flex justify-content-start mb-2" style="gap: 10px;">
+			Avatar:
+			<input class="w-75 text-center"  value="https://as2.ftcdn.net/v2/jpg/03/31/69/91/1000_F_331699188_lRpvqxO5QRtwOM05gR50ImaaJgBx68vi.jpg" disabled />
+		</label>
+		<img src="https://as2.ftcdn.net/v2/jpg/03/31/69/91/1000_F_331699188_lRpvqxO5QRtwOM05gR50ImaaJgBx68vi.jpg" class="rounded-circle" style="width: 100px;"
+			 alt="Avatar" />
+	</div>
+</div>
+
+
+
+<button class="btn btn-primary" @onclick="Return">Return</button>
+
+@code {
+
+	[Parameter]
+	public int id { get; set; }
+	public Student Student { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		Student = await StudentService.GetStudent(id);
+	}
+
+	private void Return()
+	{
+		navigator.NavigateTo("/students");
+	}
+}
